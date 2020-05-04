@@ -15,7 +15,21 @@ kubectl apply -Rf 01-prom-setup/
 kubectl apply -f service-monitor.yaml
 ```
 
+Access the Prom UI: 
+
+```
+kubectl port-forward svc/prometheus-operated 9090 9090
+```
+
+http://localhost:9090/graph?g0.range_input=1h&g0.expr=http_requests_total&g0.tab=1
+
 ## Launching the Adapter
+
+The k8s metrics server should be enabled, for minikube enable the addon:
+
+```
+minikube addons enable metrics-server
+```
 
 Now that you've got a running copy of Prometheus that's monitoring your application, you'll need to deploy the adapter, which knows how to communicate with both Kubernetes and Prometheus, acting as a translator between the two.
 
@@ -204,3 +218,10 @@ Events:
 ```
 
 Now that you've got your app autoscaling on the HTTP requests, you're all ready to launch! If you leave the app alone for a while, the HPA should scale it back down, so you can save precious budget for the launch party.
+
+## Tear-Down
+
+```
+kubectl delete -Rf . --ignore-not-found=true
+kubectl delete secret cm-adapter-serving-certs
+```

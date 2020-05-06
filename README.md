@@ -3,16 +3,16 @@
 ## sample-app Deployment
 
 ```
-kubectl apply -f sample-app.deploy.yaml
+kubectl apply -f sample-app/00-app-deployment.yaml
 curl http://$(minikube ip):$(kubectl get service sample-app -o jsonpath='{ .spec.ports[0].nodePort }')/metrics 
 ```
 
 ## Prometheus Setup
 
 ```
-kubectl apply -f 00-prom-crd/
-kubectl apply -Rf 01-prom-setup/
-kubectl apply -f service-monitor.yaml
+kubectl apply -f  prometheus/00-prom-operator-crd.yaml
+kubectl apply -Rf prometheus/01-prom-setup/
+kubectl apply -f  prometheus/03-service-monitor.yaml
 ```
 
 Access the Prom UI: 
@@ -38,7 +38,7 @@ The `adapter` directory contains the appropriate files for creating the Kubernet
 As a prerequisite, we need to create a secret called `cm-adapter-serving-certs` with two values: `serving.crt` and `serving.key`:
 
 ```
-cd $GOPATH/src/github.com/directxman12/k8s-prometheus-adapter
+cd PATH_TO/github.com/directxman12/k8s-prometheus-adapter
 export PURPOSE=serving
 openssl req -x509 -sha256 -new -nodes -days 365 -newkey rsa:2048 -keyout ${PURPOSE}-ca.key -out ${PURPOSE}-ca.crt -subj "/CN=ca"
 echo '{"signing":{"default":{"expiry":"43800h","usages":["signing","key encipherment","'${PURPOSE}'"]}}}' > "${PURPOSE}-ca-config.json"
@@ -129,7 +129,7 @@ kubectl get --raw '/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*
 Now that you finally have the metrics API set up, your HorizontalPodAutoscaler should be able to fetch the appropriate metric, and make decisions based on it:
 
 ```
-kubectl apply -f sample-app-hpa.yaml
+kubectl apply -f sample-app/01-sample-app-hpa.yaml
 ```
 
 ```
